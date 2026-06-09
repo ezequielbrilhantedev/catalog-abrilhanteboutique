@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
-import Logo from '../../public/brand/logo-nome.png';
+const Logo = '/brand/logo-nome.png';
 import { Button } from '../components/ui/Button';
 import { supabase } from '../lib/supabase';
 
