@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingBag } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { Product } from '../types'
 import { useCartStore } from '../store/cart'
+import { PriceTag } from './ui/PriceTag'
+import { Badge } from './ui/Badge'
 
 interface Props {
   product: Product
@@ -9,52 +12,72 @@ interface Props {
 
 export function ProductCard({ product }: Props) {
   const addItem = useCartStore((s) => s.addItem)
-
-  const formatted = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(product.price)
+  const [hover, setHover] = useState(false)
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <Link to={`/produto/${product.id}`}>
-        <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
-          {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300">
-              <ShoppingBag size={48} />
-            </div>
-          )}
-        </div>
+    <article
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      className="overflow-hidden rounded-lg bg-card"
+      style={{
+        border: '1px solid',
+        borderColor: hover ? 'var(--border-gold)' : 'var(--border-soft)',
+        boxShadow: hover ? 'var(--shadow-gold)' : 'var(--shadow-sm)',
+        transform: hover ? 'translateY(-4px)' : 'translateY(0)',
+        transition:
+          'transform var(--dur-base) var(--ease-out), border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out)',
+      }}
+    >
+      <Link to={`/produto/${product.id}`} className="relative block aspect-[3/4] overflow-hidden bg-sunken">
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+            style={{
+              transition: 'transform var(--dur-slow) var(--ease-out)',
+              transform: hover ? 'scale(1.05)' : 'scale(1)',
+            }}
+          />
+        ) : (
+          <div className="grid h-full w-full place-items-center text-gold-700" style={{ fontSize: 40 }}>
+            ◈
+          </div>
+        )}
+        {product.badge && (
+          <div className="absolute left-3 top-3">
+            <Badge tone="gold">{product.badge}</Badge>
+          </div>
+        )}
       </Link>
 
       <div className="p-4">
         <Link to={`/produto/${product.id}`}>
-          <h3 className="font-medium text-gray-900 hover:text-brand-600 transition-colors line-clamp-1">
+          <h3 className="m-0 truncate font-display text-lg font-semibold leading-tight text-strong">
             {product.name}
           </h3>
         </Link>
-        {product.description && (
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-            {product.description}
-          </p>
-        )}
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-semibold text-brand-600">{formatted}</span>
+        <div className="mt-3 flex items-center justify-between">
+          <PriceTag value={product.price} original={product.original_price} size="md" />
           <button
+            type="button"
+            aria-label={`Adicionar ${product.name} ao carrinho`}
             onClick={() => addItem(product)}
-            className="flex items-center gap-1.5 bg-brand-600 text-white text-sm px-3 py-1.5 rounded-full hover:bg-brand-700 transition-colors"
+            className="flex flex-shrink-0 items-center justify-center rounded-full"
+            style={{
+              width: 38,
+              height: 38,
+              border: '1px solid var(--border-gold)',
+              background: hover ? 'var(--gold-sheen)' : 'transparent',
+              color: hover ? 'var(--text-on-gold)' : 'var(--text-gold)',
+              transition: 'all var(--dur-fast) var(--ease-out)',
+            }}
           >
-            <ShoppingBag size={14} />
-            Adicionar
+            <Plus size={16} />
           </button>
         </div>
       </div>
-    </div>
+    </article>
   )
 }

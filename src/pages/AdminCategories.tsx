@@ -7,6 +7,7 @@ import { Plus, Trash2, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useCategories } from '../hooks/useCategories'
+import { Button } from '../components/ui/Button'
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
@@ -23,21 +24,26 @@ function toSlug(name: string) {
     .replace(/(^-|-$)/g, '')
 }
 
+const fieldClass =
+  'w-full rounded-md border border-soft bg-card px-4 py-3 font-sans text-sm text-strong outline-none transition focus:border-gold-500 focus:shadow-[0_0_0_3px_var(--ring-focus)]'
+
 export function AdminCategories() {
   const queryClient = useQueryClient()
   const { data: categories = [] } = useCategories()
   const [showForm, setShowForm] = useState(false)
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
-    useForm<FormData>({ resolver: zodResolver(schema) })
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
 
   const createMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const { error } = await supabase.from('categories').insert([{
-        name: data.name,
-        slug: toSlug(data.name),
-        display_order: categories.length,
-      }])
+      const { error } = await supabase.from('categories').insert([
+        { name: data.name, slug: toSlug(data.name), display_order: categories.length },
+      ])
       if (error) throw error
     },
     onSuccess: () => {
@@ -52,85 +58,78 @@ export function AdminCategories() {
       const { error } = await supabase.from('categories').delete().eq('id', id)
       if (error) throw error
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] })
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['categories'] }),
   })
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="flex items-center gap-3 mb-6">
-        <Link to="/admin/produtos" className="text-gray-500 hover:text-brand-600 transition-colors">
-          <ArrowLeft size={20} />
-        </Link>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">Categorias</h1>
+    <div className="min-h-screen bg-page">
+      <div className="mx-auto max-w-narrow px-6 py-10">
+        <div className="mb-6 flex items-center gap-3">
+          <Link to="/admin/produtos" className="text-muted transition-colors hover:text-gold-text" aria-label="Voltar aos produtos">
+            <ArrowLeft size={20} />
+          </Link>
+          <div className="flex-1">
+            <div className="bb-eyebrow text-xs">Painel administrativo</div>
+            <h1 className="mt-1 font-display text-3xl font-semibold text-strong">Categorias</h1>
+          </div>
+          <Button variant="primary" onClick={() => setShowForm(true)}>
+            <Plus size={16} />
+            Nova categoria
+          </Button>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          <Plus size={16} />
-          Nova categoria
-        </button>
-      </div>
 
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        {categories.length === 0 ? (
-          <p className="text-center text-gray-400 py-10">Nenhuma categoria cadastrada.</p>
-        ) : (
-          <ul className="divide-y divide-gray-100">
-            {categories.map((cat) => (
-              <li key={cat.id} className="flex items-center justify-between px-4 py-3">
-                <span className="font-medium text-gray-900">{cat.name}</span>
-                <button
-                  onClick={() => {
-                    if (confirm(`Excluir a categoria "${cat.name}"?`)) {
-                      deleteMutation.mutate(cat.id)
-                    }
-                  }}
-                  className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+        <div className="overflow-hidden rounded-lg border border-soft bg-card">
+          {categories.length === 0 ? (
+            <p className="py-10 text-center font-sans text-faint">Nenhuma categoria cadastrada.</p>
+          ) : (
+            <ul className="m-0 list-none p-0">
+              {categories.map((cat, i) => (
+                <li
+                  key={cat.id}
+                  className="flex items-center justify-between px-4 py-3"
+                  style={i > 0 ? { borderTop: '1px solid var(--border-soft)' } : undefined}
                 >
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <span className="font-sans font-medium text-strong">{cat.name}</span>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Excluir a categoria "${cat.name}"?`)) deleteMutation.mutate(cat.id)
+                    }}
+                    className="text-faint transition-colors hover:text-danger"
+                    aria-label="Excluir categoria"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {showForm && (
+          <form
+            onSubmit={handleSubmit((d) => createMutation.mutateAsync(d))}
+            className="mt-4 flex gap-3 rounded-lg border border-soft bg-card p-4"
+          >
+            <div className="flex-1">
+              <input {...register('name')} placeholder="Nome da categoria" autoFocus className={fieldClass} />
+              {errors.name && <p className="mt-1 font-sans text-xs text-danger">{errors.name.message}</p>}
+            </div>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => {
+                setShowForm(false)
+                reset()
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button variant="primary" type="submit" disabled={isSubmitting}>
+              Salvar
+            </Button>
+          </form>
         )}
       </div>
-
-      {showForm && (
-        <form
-          onSubmit={handleSubmit((d) => createMutation.mutateAsync(d))}
-          className="mt-4 bg-white rounded-2xl shadow-sm p-4 flex gap-3"
-        >
-          <div className="flex-1">
-            <input
-              {...register('name')}
-              placeholder="Nome da categoria"
-              autoFocus
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
-            />
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => { setShowForm(false); reset() }}
-            className="px-3 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            Salvar
-          </button>
-        </form>
-      )}
     </div>
   )
 }

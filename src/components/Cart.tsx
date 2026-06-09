@@ -1,6 +1,12 @@
-import { X, Minus, Plus, Trash2, MessageCircle } from 'lucide-react'
+import { Minus, Plus, Trash2, MessageCircle, X } from 'lucide-react'
 import { useCartStore } from '../store/cart'
 import { WHATSAPP_NUMBER } from '../lib/config'
+import { IconButton } from './ui/IconButton'
+import { Button } from './ui/Button'
+import { PriceTag } from './ui/PriceTag'
+
+const fmt = (value: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
 export function Cart() {
   const items = useCartStore((s) => s.items)
@@ -8,88 +14,97 @@ export function Cart() {
   const closeCart = useCartStore((s) => s.closeCart)
   const removeItem = useCartStore((s) => s.removeItem)
   const updateQuantity = useCartStore((s) => s.updateQuantity)
-  const clearCart = useCartStore((s) => s.clearCart)
-  const total = useCartStore((s) => s.items.reduce((sum, i) => sum + i.product.price * i.quantity, 0))
-
-  const formatted = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+  const total = useCartStore((s) => s.total())
 
   const handleWhatsApp = () => {
     const lines = items.map(
-      (i) => `• ${i.product.name} x${i.quantity} — ${formatted(i.product.price * i.quantity)}`
+      (i) => `• ${i.product.name} x${i.quantity} — ${fmt(i.product.price * i.quantity)}`
     )
     const message = [
-      'Olá! Tenho interesse nos seguintes produtos:',
+      'Olá! Tenho interesse nas seguintes semijoias:',
       '',
       ...lines,
       '',
-      `*Total: ${formatted(total)}*`,
+      `*Total: ${fmt(total)}*`,
     ].join('\n')
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank')
   }
-
-  if (!isOpen) return null
 
   return (
     <>
-      {/* Overlay */}
+      {/* Scrim */}
       <div
-        className="fixed inset-0 bg-black/40 z-40"
         onClick={closeCart}
+        className="fixed inset-0 z-40"
+        style={{
+          background: 'rgba(36,31,24,0.35)',
+          opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? 'auto' : 'none',
+          transition: 'opacity var(--dur-base) var(--ease-out)',
+        }}
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-semibold text-lg">Meu carrinho</h2>
-          <button onClick={closeCart} className="p-1 hover:text-brand-600 transition-colors">
-            <X size={20} />
-          </button>
+      <aside
+        className="fixed right-0 top-0 z-50 flex h-full flex-col bg-card"
+        style={{
+          width: 'min(420px, 92vw)',
+          borderLeft: '1px solid var(--border-hairline)',
+          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+          transition: 'transform var(--dur-slow) var(--ease-out)',
+          boxShadow: 'var(--shadow-lg)',
+        }}
+        aria-hidden={!isOpen}
+      >
+        <div className="flex items-center justify-between border-b border-soft p-6">
+          <h2 className="bb-eyebrow text-sm">Meu carrinho</h2>
+          <IconButton variant="ghost" size="sm" ariaLabel="Fechar carrinho" onClick={closeCart}>
+            <X size={18} />
+          </IconButton>
         </div>
 
-        {/* Items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex flex-1 flex-col gap-6 overflow-y-auto p-6">
           {items.length === 0 ? (
-            <p className="text-center text-gray-400 mt-12">Seu carrinho está vazio</p>
+            <p className="mt-12 text-center font-sans text-faint">Seu carrinho está vazio.</p>
           ) : (
             items.map((item) => (
               <div key={item.product.id} className="flex gap-3">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                  {item.product.image_url ? (
-                    <img
-                      src={item.product.image_url}
-                      alt={item.product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : null}
+                <div className="h-[72px] w-[72px] flex-shrink-0 overflow-hidden rounded-md border border-soft bg-sunken">
+                  {item.product.image_url && (
+                    <img src={item.product.image_url} alt="" className="h-full w-full object-cover" />
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm line-clamp-1">{item.product.name}</p>
-                  <p className="text-brand-600 font-semibold text-sm mt-0.5">
-                    {formatted(item.product.price)}
+                <div className="min-w-0 flex-1">
+                  <p className="m-0 truncate font-display text-base font-semibold text-strong">
+                    {item.product.name}
                   </p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <button
-                      onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                      className="w-6 h-6 rounded-full border flex items-center justify-center hover:border-brand-400 transition-colors"
-                    >
-                      <Minus size={12} />
-                    </button>
-                    <span className="text-sm w-4 text-center">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                      className="w-6 h-6 rounded-full border flex items-center justify-center hover:border-brand-400 transition-colors"
-                    >
-                      <Plus size={12} />
-                    </button>
+                  <div className="mt-0.5">
+                    <PriceTag value={item.product.price} size="sm" />
+                  </div>
+                  <div className="mt-2 flex items-center gap-3">
+                    <div className="flex items-center gap-3 rounded-pill border border-soft" style={{ padding: '2px 4px' }}>
+                      <button
+                        onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-gold-text"
+                        aria-label="Diminuir quantidade"
+                      >
+                        <Minus size={12} />
+                      </button>
+                      <span className="w-4 text-center font-sans text-sm text-strong">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full text-gold-text"
+                        aria-label="Aumentar quantidade"
+                      >
+                        <Plus size={12} />
+                      </button>
+                    </div>
                     <button
                       onClick={() => removeItem(item.product.id)}
-                      className="ml-auto text-gray-400 hover:text-red-500 transition-colors"
+                      className="ml-auto text-faint transition-colors hover:text-danger"
+                      aria-label="Remover item"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
@@ -98,29 +113,23 @@ export function Cart() {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t p-4 space-y-3">
-            <div className="flex justify-between font-semibold text-lg">
-              <span>Total</span>
-              <span className="text-brand-600">{formatted(total)}</span>
+          <div className="flex flex-col gap-4 border-t border-soft p-6">
+            <div className="flex items-baseline justify-between">
+              <span className="font-engrave text-xs uppercase text-muted" style={{ letterSpacing: 'var(--ls-label)' }}>
+                Total
+              </span>
+              <span className="font-display text-2xl font-semibold" style={{ color: 'var(--text-gold)' }}>
+                {fmt(total)}
+              </span>
             </div>
-            <button
-              onClick={handleWhatsApp}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
-            >
+            <Button variant="whatsapp" size="lg" block onClick={handleWhatsApp}>
               <MessageCircle size={20} />
               Finalizar pelo WhatsApp
-            </button>
-            <button
-              onClick={clearCart}
-              className="w-full text-sm text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              Limpar carrinho
-            </button>
+            </Button>
           </div>
         )}
-      </div>
+      </aside>
     </>
   )
 }

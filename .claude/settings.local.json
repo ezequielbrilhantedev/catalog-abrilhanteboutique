@@ -5,7 +5,9 @@
       "Bash(yes)",
       "Bash(echo \"exit: $?\")",
       "Bash(npm install *)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "mcp__3a484bff-6958-4f40-ae59-19febd56a939__list_projects",
+      "Bash(grep -iE \"^\\(search|shopping-bag|x|minus|plus|trash|pencil|eye|eye-off|arrow-left|log-out|message-circle|sparkles|gem\\)\\\\.js$\")"
     ]
   }
 }

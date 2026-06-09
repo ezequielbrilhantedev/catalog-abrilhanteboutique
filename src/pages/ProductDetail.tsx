@@ -1,26 +1,29 @@
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, ShoppingBag } from 'lucide-react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { useProduct } from '../hooks/useProducts'
 import { useCartStore } from '../store/cart'
+import { Button } from '../components/ui/Button'
+import { Badge } from '../components/ui/Badge'
+import { PriceTag } from '../components/ui/PriceTag'
+
+const FEATURES = ['Folheado a ouro 18k', 'Garantia de 1 ano', 'Enviamos para todo o Brasil']
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const { data: product, isLoading, error } = useProduct(id!)
   const addItem = useCartStore((s) => s.addItem)
 
-  const formatted = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-24 mb-6" />
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="aspect-[3/4] bg-gray-200 rounded-2xl" />
+      <div className="mx-auto max-w-narrow animate-pulse px-6 py-8">
+        <div className="mb-6 h-6 w-24 rounded bg-sunken" />
+        <div className="grid gap-7 md:grid-cols-2">
+          <div className="aspect-[3/4] rounded-xl bg-sunken" />
           <div className="space-y-4">
-            <div className="h-8 bg-gray-200 rounded w-3/4" />
-            <div className="h-6 bg-gray-200 rounded w-1/3" />
-            <div className="h-20 bg-gray-200 rounded" />
+            <div className="h-8 w-3/4 rounded bg-sunken" />
+            <div className="h-6 w-1/3 rounded bg-sunken" />
+            <div className="h-20 rounded bg-sunken" />
           </div>
         </div>
       </div>
@@ -29,60 +32,65 @@ export function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-        <p className="text-gray-500">Produto não encontrado.</p>
-        <Link to="/" className="text-brand-600 hover:underline mt-4 inline-block">
-          Voltar ao catálogo
+      <div className="mx-auto max-w-narrow px-6 py-16 text-center">
+        <p className="font-sans text-muted">Produto não encontrado.</p>
+        <Link to="/" className="mt-4 inline-block text-gold-text hover:underline">
+          Voltar à vitrine
         </Link>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-1.5 text-gray-500 hover:text-brand-600 transition-colors mb-6"
+    <div className="mx-auto max-w-narrow px-6 pb-16 pt-8">
+      <button
+        onClick={() => navigate('/')}
+        className="mb-6 inline-flex items-center gap-2 font-sans text-sm text-muted transition-colors hover:text-gold-text"
       >
         <ArrowLeft size={16} />
-        Voltar
-      </Link>
+        Voltar à vitrine
+      </button>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="aspect-[3/4] bg-gray-100 rounded-2xl overflow-hidden">
+      <div className="grid items-start gap-7 md:grid-cols-2">
+        <div className="aspect-[3/4] overflow-hidden rounded-xl border border-soft bg-sunken">
           {product.image_url ? (
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300">
-              <ShoppingBag size={64} />
+            <div className="grid h-full w-full place-items-center text-gold-700" style={{ fontSize: 56 }}>
+              ◈
             </div>
           )}
         </div>
 
-        <div className="flex flex-col">
-          {product.categories && (
-            <span className="text-sm text-brand-500 font-medium mb-2">
-              {product.categories.name}
-            </span>
-          )}
-          <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
-          <p className="text-3xl font-bold text-brand-600 mt-3">
-            {formatted(product.price)}
-          </p>
+        <div className="flex min-h-full flex-col">
+          <div className="mb-3 flex items-center gap-2">
+            {product.categories && <span className="bb-eyebrow text-xs">{product.categories.name}</span>}
+            {product.badge && <Badge tone="gold">{product.badge}</Badge>}
+          </div>
+
+          <h1 style={{ fontSize: '2.25rem', lineHeight: 1.1 }}>{product.name}</h1>
+
+          <div className="my-4">
+            <PriceTag value={product.price} original={product.original_price} size="lg" />
+          </div>
+
           {product.description && (
-            <p className="text-gray-600 mt-4 leading-relaxed">{product.description}</p>
+            <p className="m-0 font-sans text-base leading-relaxed text-muted">{product.description}</p>
           )}
-          <button
-            onClick={() => addItem(product)}
-            className="mt-auto pt-6 w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors"
-          >
-            <ShoppingBag size={20} />
-            Adicionar ao carrinho
-          </button>
+
+          <ul className="mt-6 flex list-none flex-col gap-2 p-0">
+            {FEATURES.map((f) => (
+              <li key={f} className="flex items-center gap-2 font-sans text-sm text-body">
+                <span className="text-gold-400">◆</span> {f}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-10">
+            <Button variant="primary" size="lg" block onClick={() => addItem(product)}>
+              Adicionar ao carrinho
+            </Button>
+          </div>
         </div>
       </div>
     </div>

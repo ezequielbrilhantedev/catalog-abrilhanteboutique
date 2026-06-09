@@ -1,26 +1,30 @@
-import { Link } from 'react-router-dom'
-import { CartButton } from './CartButton'
+import type { ReactNode } from 'react'
+import { StoreHeader } from './StoreHeader'
 import { Cart } from './Cart'
 
 interface Props {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function Layout({ children }: Props) {
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="font-bold text-xl tracking-tight text-brand-700">
-            abboutique
-          </Link>
-          <CartButton />
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-page">
+      <StoreHeader />
       <main>{children}</main>
-
+      <Footer />
       <Cart />
     </div>
+  )
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-hairline px-6 py-10 text-center">
+      <div className="bb-diamond mb-3" />
+      <p className="m-0 font-engrave text-xs uppercase text-faint" style={{ letterSpacing: 'var(--ls-label)' }}>
+        Brilhante Boutique · @abrilhanteboutique
+      </p>
+      <p className="bb-note mt-2 text-xs">as semijoias certas para você brilhar ✨</p>
+    </footer>
   )
 }

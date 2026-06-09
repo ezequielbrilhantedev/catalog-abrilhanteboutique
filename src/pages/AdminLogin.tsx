@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { supabase } from '../lib/supabase'
+import { Logo } from '../components/ui/Logo'
+import { Button } from '../components/ui/Button'
 
 const schema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -12,12 +14,17 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
+const fieldClass =
+  'w-full rounded-md border border-soft bg-card px-4 py-3 font-sans text-sm text-strong outline-none transition focus:border-gold-500 focus:shadow-[0_0_0_3px_var(--ring-focus)]'
+
 export function AdminLogin() {
   const navigate = useNavigate()
   const [serverError, setServerError] = useState('')
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: FormData) => {
     setServerError('')
@@ -33,49 +40,46 @@ export function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white rounded-2xl shadow-sm p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Painel Admin</h1>
-        <p className="text-gray-500 text-sm mb-6">Abboutique</p>
+    <div className="grid min-h-screen place-items-center bg-base px-6 py-10">
+      <div
+        className="w-full rounded-xl border border-soft bg-card p-8 shadow-md"
+        style={{ maxWidth: 420 }}
+      >
+        <div className="mb-5 flex justify-center">
+          <Logo layout="stack" size="md" />
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-            <input
-              {...register('email')}
-              type="email"
-              autoComplete="email"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-            )}
+        <div className="mb-6 text-center">
+          <h1 className="font-display text-2xl font-semibold text-strong">Painel admin</h1>
+          <p className="bb-eyebrow mt-2 text-xs">Acesso restrito</p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="font-sans text-xs font-medium uppercase text-muted" style={{ letterSpacing: 'var(--ls-wide)' }}>
+              E-mail
+            </label>
+            <input {...register('email')} type="email" autoComplete="email" placeholder="voce@exemplo.com" className={fieldClass} />
+            {errors.email && <p className="font-sans text-xs text-danger">{errors.email.message}</p>}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-            <input
-              {...register('password')}
-              type="password"
-              autoComplete="current-password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent"
-            />
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
-            )}
+          <div className="flex flex-col gap-2">
+            <label className="font-sans text-xs font-medium uppercase text-muted" style={{ letterSpacing: 'var(--ls-wide)' }}>
+              Senha
+            </label>
+            <input {...register('password')} type="password" autoComplete="current-password" placeholder="••••••••" className={fieldClass} />
+            {errors.password && <p className="font-sans text-xs text-danger">{errors.password.message}</p>}
           </div>
 
-          {serverError && (
-            <p className="text-red-500 text-sm text-center">{serverError}</p>
-          )}
+          {serverError && <p className="text-center font-sans text-sm text-danger">{serverError}</p>}
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
-          >
-            {isSubmitting ? 'Entrando...' : 'Entrar'}
-          </button>
+          <Button type="submit" variant="primary" size="lg" block disabled={isSubmitting}>
+            {isSubmitting ? 'Entrando…' : 'Entrar'}
+          </Button>
+
+          <a href="/" className="mt-1 text-center font-sans text-sm text-muted hover:text-gold-text">
+            ← Voltar à vitrine
+          </a>
         </form>
       </div>
     </div>

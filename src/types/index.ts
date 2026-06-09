@@ -10,6 +10,8 @@ export interface Product {
   name: string
   description: string | null
   price: number
+  original_price: number | null
+  badge: string | null
   category_id: string | null
   image_url: string | null
   active: boolean

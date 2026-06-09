@@ -1,0 +1,202 @@
+/* ============================================================
+   Brilhante Boutique — Design Tokens
+   White & gold luxury. Warm-white / ivory surfaces, deep metallic
+   gold accents, espresso ink text, deep wine-red romantic accent.
+   Ported from the Brilhante Boutique Design System.
+   ============================================================ */
+
+:root {
+  /* ---- Noir surfaces (warm near-black) ---- */
+  --noir-950: #08080a;
+  --noir-900: #0c0c0e;
+  --noir-850: #131316;
+  --noir-800: #1a1a1e;
+  --noir-700: #242329;
+  --noir-600: #312f37;
+  --noir-500: #46434c;
+
+  /* ---- Gold (metallic, champagne -> bronze) ---- */
+  --gold-100: #f7eac2;
+  --gold-200: #ecd79a;
+  --gold-300: #e0c078;
+  --gold-400: #d0a957;
+  --gold-500: #c39a45; /* PRIMARY gold */
+  --gold-600: #a67e33;
+  --gold-700: #836225;
+  --gold-800: #5e461a;
+
+  /* gold metallic gradient (logo / shine) */
+  --gold-sheen: linear-gradient(135deg, #d9b45f 0%, #b98c3a 36%, #8a6620 64%, #c99f49 100%);
+
+  /* ---- Ivory / cream text ---- */
+  --ivory-100: #f6f1e7;
+  --ivory-200: #e7e0d2;
+  --ivory-300: #c7bfb0;
+  --ivory-400: #968f81;
+  --ivory-500: #6b6559;
+
+  /* ---- Warm-white surface ramp ---- */
+  --white-50: #ffffff;
+  --white-100: #fbf8f1;
+  --white-200: #f4eddf;
+  --white-300: #ede4d2;
+  --white-400: #e4d9c2;
+
+  /* ---- Espresso ink text ramp ---- */
+  --ink-900: #241f18;
+  --ink-700: #3b342a;
+  --ink-500: #6e6557;
+  --ink-300: #9c9384;
+  --ink-200: #beb6a6;
+
+  /* ---- Paper (cream light surface) ---- */
+  --paper-100: #f4efe5;
+  --paper-200: #eae3d5;
+  --paper-ink: #2a2722;
+
+  /* ---- Brand accents ---- */
+  --bordo-500: #8e2a2a;
+  --bordo-600: #732020;
+  --bordo-100: #e9c9c5;
+
+  /* ---- Functional ---- */
+  --whats-500: #25d366;
+  --whats-600: #1da851;
+  --success-500: #4fa86a;
+  --danger-500: #c9514b;
+  --danger-100: #e9c9c5;
+
+  /* ---- Semantic aliases ---- */
+  --bg-page: var(--white-100);
+  --bg-base: var(--white-200);
+  --surface-card: var(--white-50);
+  --surface-raised: var(--white-50);
+  --surface-hover: var(--white-300);
+  --surface-sunken: var(--white-400);
+  --surface-ink: var(--noir-900);
+  --surface-paper: var(--paper-100);
+
+  --text-strong: var(--ink-900);
+  --text-body: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --text-faint: var(--ink-300);
+  --text-disabled: var(--ink-200);
+  --text-gold: #8a6620;
+  --text-on-gold: #1e1606;
+  --text-on-ink: var(--ivory-100);
+  --text-on-paper: var(--paper-ink);
+
+  --border-hairline: rgba(138, 102, 32, 0.28);
+  --border-soft: rgba(36, 31, 24, 0.12);
+  --border-gold: rgba(166, 126, 51, 0.6);
+  --ring-focus: rgba(166, 126, 51, 0.45);
+
+  --accent: var(--gold-500);
+  --accent-hover: var(--gold-400);
+  --accent-press: var(--gold-700);
+  --price: #8a6620;
+
+  /* ---- Type families ---- */
+  --font-engrave: 'Cinzel', 'Times New Roman', serif;
+  --font-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  --font-sans: 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  --font-note: 'Special Elite', 'Courier New', monospace;
+
+  /* ---- Letter spacing ---- */
+  --ls-engrave: 0.22em;
+  --ls-label: 0.16em;
+  --ls-wide: 0.06em;
+
+  /* ---- Radii ---- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(60, 45, 20, 0.08);
+  --shadow-md: 0 10px 30px rgba(60, 45, 20, 0.1);
+  --shadow-lg: 0 22px 50px rgba(60, 45, 20, 0.14);
+  --shadow-gold: 0 0 0 1px rgba(166, 126, 51, 0.32), 0 12px 30px rgba(166, 126, 51, 0.18);
+  --glow-gold: 0 0 22px rgba(196, 154, 69, 0.28);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+  --dur-fast: 140ms;
+  --dur-base: 240ms;
+  --dur-slow: 420ms;
+
+  /* ---- Layout ---- */
+  --header-h: 68px;
+}
+
+/* ============================================================
+   Brand helper classes
+   ============================================================ */
+
+::selection {
+  background: rgba(196, 154, 69, 0.28);
+  color: var(--ink-900);
+}
+
+/* engraved eyebrow / section label */
+.bb-eyebrow {
+  font-family: var(--font-engrave);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--text-gold);
+}
+
+/* metallic gold text (logo-style shine) */
+.bb-gold-text {
+  background: var(--gold-sheen);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* gold sheen fill (buttons, chips, badges) */
+.bb-gold-fill {
+  background: var(--gold-sheen);
+  color: var(--text-on-gold);
+}
+
+/* hairline gold rule */
+.bb-rule {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+/* small gold diamond glyph (◆) divider */
+.bb-diamond::before {
+  content: '◆';
+  color: var(--gold-400);
+  font-size: 0.7em;
+}
+
+/* typewriter romantic note */
+.bb-note {
+  font-family: var(--font-note);
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+/* focus-visible ring used by interactive primitives */
+.bb-focusable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg-page), 0 0 0 4px var(--ring-focus);
+}
+
+/* hide scrollbar on horizontal scrollers (category bar) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
