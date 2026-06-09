@@ -9,6 +9,9 @@ import { ProductDetail } from './pages/ProductDetail'
 // Admin é code-split: react-hook-form + zod + telas de gestão saem do
 // bundle crítico da vitrine (público), que é o caminho quente.
 const AdminLogin = lazy(() => import('./pages/AdminLogin').then((m) => ({ default: m.AdminLogin })))
+const AdminResetPassword = lazy(() =>
+  import('./pages/AdminResetPassword').then((m) => ({ default: m.AdminResetPassword }))
+)
 const AdminProducts = lazy(() => import('./pages/AdminProducts').then((m) => ({ default: m.AdminProducts })))
 const AdminCategories = lazy(() =>
   import('./pages/AdminCategories').then((m) => ({ default: m.AdminCategories }))
@@ -57,6 +60,14 @@ export default function App() {
             element={
               <Suspense fallback={<AdminFallback />}>
                 <AdminLogin />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin/redefinir-senha"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminResetPassword />
               </Suspense>
             }
           />
