@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, X, ShoppingBag } from 'lucide-react'
+import { Search, X, ShoppingBag, Settings2 } from 'lucide-react'
 import { Logo } from './ui/Logo'
 import { IconButton } from './ui/IconButton'
 import { useCartStore } from '../store/cart'
@@ -63,12 +63,29 @@ export function StoreHeader() {
             </div>
           )}
 
+          {/* Desktop: texto; mobile: ícone */}
           <Link
             to="/admin"
             className="mr-1 hidden font-engrave text-faint uppercase sm:inline"
             style={{ fontSize: '0.6875rem', letterSpacing: 'var(--ls-label)' }}
           >
             Admin
+          </Link>
+          <Link
+            to="/admin"
+            className="sm:hidden"
+            aria-label="Acessar painel admin"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 44,
+              height: 44,
+              borderRadius: '50%',
+              color: 'var(--text-body)',
+            }}
+          >
+            <Settings2 size={20} />
           </Link>
 
           <IconButton variant="ghost" ariaLabel={searchOpen ? 'Fechar busca' : 'Buscar'} onClick={handleSearchToggle}>
