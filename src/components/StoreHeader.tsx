@@ -43,11 +43,16 @@ export function StoreHeader() {
         <Link
           to="/"
           aria-label="Brilhante Boutique — início"
+          className="flex items-center rounded-pill px-6 py-1.5"
+          style={{
+            background: 'var(--ink-900)',
+            boxShadow: '0 1px 3px rgba(36,31,24,0.25)',
+          }}
         >
           <img
             src={Logo}
             alt="Brilhante Boutique"
-            style={{ height: 50 }}
+            style={{ height: 38 }}
           />
         </Link>
 

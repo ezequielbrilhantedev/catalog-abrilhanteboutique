@@ -37,11 +37,19 @@ export function AdminLogin() {
         style={{ maxWidth: 420 }}
       >
         <div className="mb-5 flex justify-center">
-          <img
-            src={Logo}
-            alt="Brilhante Boutique"
-            style={{ height: 91 }}
-          />
+          <div
+            className="flex items-center justify-center rounded-xl px-6 py-4"
+            style={{
+              background: 'var(--ink-900)',
+              boxShadow: '0 2px 8px rgba(36,31,24,0.25)',
+            }}
+          >
+            <img
+              src={Logo}
+              alt="Brilhante Boutique"
+              style={{ height: 80 }}
+            />
+          </div>
         </div>
 
         {mode === 'login' ? (
