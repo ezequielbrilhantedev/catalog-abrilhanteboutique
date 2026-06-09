@@ -1,10 +1,10 @@
 import { Search, ShoppingBag, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Logo from '../../public/brand/logo-nome.png';
 import { useCartStore } from '../store/cart';
 import { useSearchStore } from '../store/search';
 import { IconButton } from './ui/IconButton';
-import { Logo } from './ui/Logo';
 
 export function StoreHeader() {
   const navigate = useNavigate();
@@ -44,7 +44,11 @@ export function StoreHeader() {
           to="/"
           aria-label="Brilhante Boutique — início"
         >
-          <Logo layout="inline" size="md" />
+          <img
+            src={Logo}
+            alt="Brilhante Boutique"
+            style={{ height: 50 }}
+          />
         </Link>
 
         <div className="flex items-center gap-2">
