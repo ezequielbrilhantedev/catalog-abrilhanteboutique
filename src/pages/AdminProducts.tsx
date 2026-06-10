@@ -40,7 +40,7 @@ export function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [pendingImageUrl, setPendingImageUrl] = useState<string | null>(null)
+  const [images, setImages] = useState<string[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
 
   const { data: categories = [] } = useCategories()
@@ -106,14 +106,14 @@ export function AdminProducts() {
 
   const openCreate = () => {
     setEditingProduct(null)
-    setPendingImageUrl(null)
+    setImages([])
     reset({ name: '', description: '', price: 0, original_price: '', badge: '', category_id: '', active: true })
     setShowForm(true)
   }
 
   const openEdit = (product: Product) => {
     setEditingProduct(product)
-    setPendingImageUrl(null)
+    setImages(product.images?.length ? product.images : product.image_url ? [product.image_url] : [])
     reset({
       name: product.name,
       description: product.description ?? '',
@@ -129,22 +129,31 @@ export function AdminProducts() {
   const closeForm = () => {
     setShowForm(false)
     setEditingProduct(null)
-    setPendingImageUrl(null)
+    setImages([])
     reset()
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
     setUploadingImage(true)
-    const ext = file.name.split('.').pop()
-    const path = `${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('product-images').upload(path, file)
-    if (!error) {
-      const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-      setPendingImageUrl(data.publicUrl)
+    const uploaded: string[] = []
+    for (const file of files) {
+      const ext = file.name.split('.').pop()
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+      const { error } = await supabase.storage.from('product-images').upload(path, file)
+      if (!error) {
+        const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+        uploaded.push(data.publicUrl)
+      }
     }
+    if (uploaded.length) setImages((prev) => [...prev, ...uploaded])
     setUploadingImage(false)
+    e.target.value = ''
+  }
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index))
   }
 
   const onSubmit = async (data: FormData) => {
@@ -157,7 +166,8 @@ export function AdminProducts() {
       badge: data.badge?.trim() || null,
       category_id: data.category_id || null,
       active: data.active,
-      image_url: pendingImageUrl ?? editingProduct?.image_url ?? null,
+      images,
+      image_url: images[0] ?? null,
     })
   }
 
@@ -165,8 +175,6 @@ export function AdminProducts() {
     await supabase.auth.signOut()
     navigate('/admin')
   }
-
-  const previewImage = pendingImageUrl ?? editingProduct?.image_url ?? null
 
   return (
     <div className="min-h-screen bg-page">
@@ -338,27 +346,52 @@ export function AdminProducts() {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className={labelClass} style={labelStyle}>Foto</label>
-                  <div className="flex items-center gap-4">
-                    <div className="grid h-[88px] w-[88px] flex-shrink-0 place-items-center overflow-hidden rounded-md border border-soft bg-sunken text-gold-700">
-                      {previewImage ? (
-                        <img src={previewImage} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <span style={{ fontSize: 28 }}>◈</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                      <Button variant="secondary" size="sm" onClick={() => fileRef.current?.click()} disabled={uploadingImage}>
-                        {uploadingImage ? 'Enviando…' : previewImage ? 'Trocar foto' : 'Enviar foto'}
-                      </Button>
-                      {pendingImageUrl && (
-                        <button type="button" onClick={() => setPendingImageUrl(null)} className="text-left font-sans text-xs text-faint">
-                          Remover
+                  <label className={labelClass} style={labelStyle}>Fotos</label>
+                  <div className="flex flex-wrap items-start gap-3">
+                    {images.map((url, index) => (
+                      <div
+                        key={url}
+                        className="relative h-[88px] w-[88px] flex-shrink-0 overflow-hidden rounded-md border border-soft bg-sunken"
+                      >
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        {index === 0 && (
+                          <span
+                            className="bb-gold-fill absolute bottom-1 left-1 rounded-sm px-1.5 font-sans font-medium"
+                            style={{ fontSize: '0.625rem', letterSpacing: 'var(--ls-wide)' }}
+                          >
+                            Capa
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          aria-label="Remover foto"
+                          className="absolute right-1 top-1 grid h-5 w-5 place-items-center rounded-full shadow-sm transition hover:scale-110"
+                          style={{ background: 'var(--surface-ink)', color: 'var(--ivory-100)' }}
+                        >
+                          <X size={12} />
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    ))}
+                    <input ref={fileRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="bb-focusable grid h-[88px] w-[88px] flex-shrink-0 place-items-center rounded-md transition hover:bg-sunken disabled:opacity-60"
+                      style={{ border: '1px dashed var(--border-gold)', color: 'var(--text-gold)' }}
+                    >
+                      <span className="flex flex-col items-center gap-1">
+                        <Plus size={20} />
+                        <span className="font-sans" style={{ fontSize: '0.6875rem' }}>
+                          {uploadingImage ? 'Enviando…' : 'Adicionar'}
+                        </span>
+                      </span>
+                    </button>
                   </div>
+                  <p className="m-0 font-sans text-xs text-faint">
+                    A primeira foto é a capa exibida na vitrine. Adicione quantas quiser.
+                  </p>
                 </div>
 
                 <ActiveToggle register={register} checked={watch('active') ?? true} />

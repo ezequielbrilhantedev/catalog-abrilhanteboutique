@@ -14,6 +14,7 @@ export interface Product {
   badge: string | null
   category_id: string | null
   image_url: string | null
+  images: string[] | null
   active: boolean
   created_at: string
   categories?: Category | null
