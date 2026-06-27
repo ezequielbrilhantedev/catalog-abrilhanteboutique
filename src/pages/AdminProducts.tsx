@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Pencil, Trash2, X, LogOut, Tag } from 'lucide-react'
+import { Plus, Pencil, Trash2, X, LogOut, Tag, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useCategories } from '../hooks/useCategories'
@@ -13,10 +13,22 @@ import { IconButton } from '../components/ui/IconButton'
 import { Badge } from '../components/ui/Badge'
 import { PriceTag } from '../components/ui/PriceTag'
 
+const PER_PAGE = 10
+
+function normalize(s: string) {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+}
+
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
   description: z.string().optional(),
-  price: z.coerce.number().positive('Preço deve ser maior que zero'),
+  price: z
+    .string()
+    .optional()
+    .refine((v) => !v || Number(v.replace(',', '.')) > 0, 'Preço inválido'),
   original_price: z
     .string()
     .optional()
@@ -41,6 +53,8 @@ export function AdminProducts() {
   const [showForm, setShowForm] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [images, setImages] = useState<string[]>([])
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const { data: categories = [] } = useCategories()
@@ -107,7 +121,7 @@ export function AdminProducts() {
   const openCreate = () => {
     setEditingProduct(null)
     setImages([])
-    reset({ name: '', description: '', price: 0, original_price: '', badge: '', category_id: '', active: true })
+    reset({ name: '', description: '', price: '', original_price: '', badge: '', category_id: '', active: true })
     setShowForm(true)
   }
 
@@ -117,7 +131,7 @@ export function AdminProducts() {
     reset({
       name: product.name,
       description: product.description ?? '',
-      price: product.price,
+      price: product.price != null ? String(product.price) : '',
       original_price: product.original_price != null ? String(product.original_price) : '',
       badge: product.badge ?? '',
       category_id: product.category_id ?? '',
@@ -158,10 +172,11 @@ export function AdminProducts() {
 
   const onSubmit = async (data: FormData) => {
     const original = data.original_price ? Number(data.original_price.replace(',', '.')) : null
+    const price = data.price ? Number(data.price.replace(',', '.')) : null
     await saveMutation.mutateAsync({
       name: data.name.trim(),
       description: data.description?.trim() || null,
-      price: data.price,
+      price,
       original_price: original,
       badge: data.badge?.trim() || null,
       category_id: data.category_id || null,
@@ -174,6 +189,19 @@ export function AdminProducts() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate('/admin')
+  }
+
+  const query = search.trim()
+  const filtered = query
+    ? products.filter((p) => normalize(p.name).includes(normalize(query)))
+    : products
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+  const currentPage = Math.min(page, totalPages)
+  const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
+
+  const handleSearch = (value: string) => {
+    setSearch(value)
+    setPage(1)
   }
 
   return (
@@ -204,6 +232,20 @@ export function AdminProducts() {
           </div>
         </div>
 
+        <div className="mb-4 relative">
+          <Search
+            size={16}
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint"
+          />
+          <input
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Buscar pelo nome do produto…"
+            className={`${fieldClass} pl-10`}
+            style={{ maxWidth: 360 }}
+          />
+        </div>
+
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -227,7 +269,7 @@ export function AdminProducts() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product) => (
+                {pageItems.map((product) => (
                   <tr key={product.id} className="border-t border-soft">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -276,6 +318,42 @@ export function AdminProducts() {
                 ))}
               </tbody>
             </table>
+            {filtered.length === 0 && (
+              <div className="px-4 py-10 text-center font-sans text-sm text-faint">
+                {query ? 'Nenhum produto encontrado para esta busca.' : 'Nenhum produto cadastrado.'}
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isLoading && filtered.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="font-sans text-xs text-faint">
+              {filtered.length} {filtered.length === 1 ? 'produto' : 'produtos'}
+              {totalPages > 1 && ` · página ${currentPage} de ${totalPages}`}
+            </p>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft size={16} />
+                  Anterior
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Próxima
+                  <ChevronRight size={16} />
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -318,8 +396,8 @@ export function AdminProducts() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <label className={labelClass} style={labelStyle}>Preço (R$) *</label>
-                    <input {...register('price')} type="number" step="0.01" min="0" placeholder="0,00" className={fieldClass} />
+                    <label className={labelClass} style={labelStyle}>Preço (R$)</label>
+                    <input {...register('price')} type="number" step="0.01" min="0" placeholder="opcional" className={fieldClass} />
                     {errors.price && <p className="font-sans text-xs text-danger">{errors.price.message}</p>}
                   </div>
                   <div className="flex flex-col gap-2">

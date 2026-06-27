@@ -9,7 +9,7 @@ export interface Product {
   id: string
   name: string
   description: string | null
-  price: number
+  price: number | null
   original_price: number | null
   badge: string | null
   category_id: string | null

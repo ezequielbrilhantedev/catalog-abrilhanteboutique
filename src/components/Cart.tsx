@@ -30,7 +30,9 @@ export function Cart() {
   const handleWhatsApp = () => {
     const lines = items.map(
       (i) =>
-        `• ${i.product.name} x${i.quantity} — ${fmt(i.product.price * i.quantity)}`,
+        `• ${i.product.name} x${i.quantity} — ${
+          i.product.price != null ? fmt(i.product.price * i.quantity) : 'Valor a consultar'
+        }`,
     );
     const message = [
       'Olá! Quero fechar meu pedido da Brilhante:',
