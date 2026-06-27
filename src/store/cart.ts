@@ -62,7 +62,7 @@ export const useCartStore = create<CartStore>()(
       closeCart: () => set({ isOpen: false }),
 
       total: () =>
-        get().items.reduce((sum, i) => sum + i.product.price * i.quantity, 0),
+        get().items.reduce((sum, i) => sum + (i.product.price ?? 0) * i.quantity, 0),
 
       count: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),

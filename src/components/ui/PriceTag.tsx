@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 type Size = 'sm' | 'md' | 'lg'
 
 interface Props {
-  value: number
+  value: number | null
   original?: number | null
   size?: Size
   style?: CSSProperties
@@ -30,9 +30,9 @@ export function PriceTag({ value, original, size = 'md', style }: Props) {
           letterSpacing: '-0.01em',
         }}
       >
-        {fmt(value)}
+        {value != null ? fmt(value) : 'Valor a consultar'}
       </span>
-      {original != null && original > value && (
+      {value != null && original != null && original > value && (
         <span
           style={{
             fontFamily: 'var(--font-sans)',
