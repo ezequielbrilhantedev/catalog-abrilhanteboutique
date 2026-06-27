@@ -254,7 +254,8 @@ export function AdminProducts() {
           </div>
         ) : (
           <div className="overflow-hidden rounded-lg border border-soft bg-card">
-            <table className="w-full" style={{ borderCollapse: 'collapse' }}>
+            <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full min-w-[560px]" style={{ borderCollapse: 'collapse' }}>
               <thead>
                 <tr className="bg-base text-left">
                   {['Produto', 'Categoria', 'Preço', 'Status', ''].map((h) => (
@@ -318,6 +319,7 @@ export function AdminProducts() {
                 ))}
               </tbody>
             </table>
+            </div>
             {filtered.length === 0 && (
               <div className="px-4 py-10 text-center font-sans text-sm text-faint">
                 {query ? 'Nenhum produto encontrado para esta busca.' : 'Nenhum produto cadastrado.'}
